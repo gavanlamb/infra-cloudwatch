@@ -1,0 +1,47 @@
+resources:
+  repositories:
+    - repository: terraform-templates
+      type: github
+      name: expensely/infra-terraform-backend
+      endpoint: expensely
+
+name: 1.0$(Rev:.r)
+
+pool:
+  vmImage: ubuntu-latest
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - "main"
+
+pr:
+  branches:
+    include:
+      - '*'
+
+stages:
+  - stage: preview
+    displayName: Preview
+    variables:
+      - group: terraform.platform.preview
+    jobs:
+      - template: pipelines/templates/plan-and-approve.yml@terraform-templates
+        parameters:
+          terraformVariablesFile: variables/shared.preview.ap-southeast-2.tfvars
+          terraformWorkspace: cloudwatch_shared_preview
+          environment: Preview
+
+  - stage: production
+    displayName: Production
+    dependsOn: preview
+    variables:
+      - group: terraform.platform.production
+    jobs:
+      - template: pipelines/templates/plan-and-approve.yml@terraform-templates
+        parameters:
+          terraformVariablesFile: variables/shared.production.ap-southeast-2.tfvars
+          terraformWorkspace: cloudwatch_shared_production
+          environment: Production
+   

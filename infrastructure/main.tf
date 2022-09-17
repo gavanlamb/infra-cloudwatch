@@ -2,10 +2,12 @@ resource "aws_kms_key" "cloudwatch" {
   description = "KMS key for cloudwatch"
   deletion_window_in_days = 10
   policy = data.aws_iam_policy_document.cloudwatch.json
+  enable_key_rotation = true
+  multi_region = true
 }
 
 resource "aws_kms_alias" "cloudwatch" {
-  name = "alias/expensely/${lower(var.environment)}/cloudwatch"
+  name = "alias/expensely/cloudwatch"
   target_key_id = aws_kms_key.cloudwatch.key_id
 }
 
@@ -39,20 +41,16 @@ data "aws_iam_policy_document" "cloudwatch" {
     ]
     principals {
       type = "AWS"
-      identifiers = ["*"]
+      identifiers = var.account_ids
     }
     condition {
       test     = "StringEquals"
       variable = "kms:ViaService"
       values   = [
-        "monitoring.${var.region}.amazonaws.com"
-      ]
-    }
-    condition {
-      test     = "StringEquals"
-      variable = "kms:CallerAccount"
-      values   = [
-        data.aws_caller_identity.current.account_id
+        "monitoring.ap-southeast-2.amazonaws.com",
+        "monitoring.us-east-1.amazonaws.com",
+        "monitoring.us-east-2.amazonaws.com",
+        "monitoring.us-west-2.amazonaws.com"
       ]
     }
   }
@@ -70,13 +68,13 @@ data "aws_iam_policy_document" "cloudwatch" {
     ]
     principals {
       type = "AWS"
-      identifiers = ["*"]
+      identifiers = var.account_ids
     }
     condition {
       test     = "ArnLike"
       variable = "kms:EncryptionContext:aws:logs:arn"
       values   = [
-        "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:*"
+        "arn:aws:logs:::log-group:*"
       ]
     }
   }

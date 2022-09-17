@@ -1,0 +1,9 @@
+﻿provider_role_arn="arn:aws:iam::151170476258:role/terraform.infrastructure"
+environment="Preview"
+region="ap-southeast-2"
+account_ids=[
+"829991159560",
+"365677886296",
+"537521289459",
+"172837312601"
+]
