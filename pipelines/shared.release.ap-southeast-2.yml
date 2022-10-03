@@ -22,6 +22,17 @@ pr:
       - '*'
 
 stages:
+  - stage: preview
+    displayName: Preview
+    variables:
+      - group: terraform.platform
+    jobs:
+      - template: pipelines/templates/plan-and-approve.yml@terraform-templates
+        parameters:
+          terraformVariablesFile: variables/shared.preview.ap-southeast-2.tfvars
+          terraformWorkspace: cloudwatch_shared_preview
+          environment: Preview
+          
   - stage: production
     displayName: Production
     variables:
